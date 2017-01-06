@@ -11,6 +11,7 @@ import (
 	"net"
 	"os"
 	"strings"
+	"time"
 
 	"github.com/gliderlabs/logspout/adapters/raw"
 	"github.com/gliderlabs/logspout/router"
@@ -88,7 +89,8 @@ func (t *tlsTransport) Dial(addr string, options map[string]string) (conn net.Co
 	}
 
 	// attempt to establish the TLS connection
-	conn, err = tls.Dial("tcp", addr, clientTLSConfig)
+	dialer := &net.Dialer{Timeout: 10 * time.Second}
+	conn, err = tls.DialWithDialer(dialer, "tcp", addr, clientTLSConfig)
 	return
 }
 

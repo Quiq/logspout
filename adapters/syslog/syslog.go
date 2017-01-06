@@ -305,6 +305,7 @@ func (a *Adapter) retryTemporary(buf []byte) error {
 }
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 func (a *Adapter) reconnect() error {
 	log.Printf("syslog: reconnecting up to %v times\n", a.retryCount)
 	err := retryExp(func() error {
@@ -315,12 +316,20 @@ func (a *SyslogAdapter) reconnect() error {
 	i := 0
 	for {
 >>>>>>> 8c14ddd (Reconnect when syslog connection is failed.)
+=======
+func (a *SyslogAdapter) reconnect() error {
+	a.conn.Close()
+	log.Println("syslog: reconnecting every 2s")
+	i := 0
+	for {
+>>>>>>> e4d31c0 (Reconnect when syslog connection is failed.)
 		conn, err := a.transport.Dial(a.route.Address, a.route.Options)
 		if err == nil {
 			log.Println("syslog: connection restored")
 			a.conn = conn
 			return nil
 		}
+<<<<<<< HEAD
 <<<<<<< HEAD
 		a.conn = conn
 		return nil
@@ -340,6 +349,16 @@ func (a *SyslogAdapter) reconnect() error {
 		time.Sleep(2 * time.Second)
 	}
 >>>>>>> 8c14ddd (Reconnect when syslog connection is failed.)
+=======
+
+		i++
+		if i == 150 {
+			log.Println("syslog: no luck to reconnect for the past 5m")
+			i = 0
+		}
+		time.Sleep(2 * time.Second)
+	}
+>>>>>>> e4d31c0 (Reconnect when syslog connection is failed.)
 }
 
 func retryExp(fun func() error, tries uint) error {
