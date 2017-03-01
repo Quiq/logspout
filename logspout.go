@@ -29,19 +29,17 @@ func main() {
 	if b := cfg.GetEnvDefault("BACKLOG", ""); b != "" {
 		log.Printf("backlog:%s\n", b)
 	}
-	log.Printf("persist:%s\n", cfg.GetEnvDefault("ROUTESPATH", "/mnt/routes"))
+	fmt.Printf("persist:%s\n", cfg.GetEnvDefault("ROUTESPATH", "/mnt/routes"))
+	fmt.Print("# jobs    : ")
 
-	var jobs []string
 	for _, job := range router.Jobs.All() {
+		fmt.Printf("%s ", job.Name())
 		if err := job.Setup(); err != nil {
-			log.Printf("!! %v\n", err)
+			fmt.Printf("!! %v\n", err)
 			os.Exit(1)
 		}
-		if job.Name() != "" {
-			jobs = append(jobs, job.Name())
-		}
 	}
-	log.Printf("# jobs    : %s\n", strings.Join(jobs, " "))
+	fmt.Println()
 
 	routes, _ := router.Routes.GetAll()
 	if len(routes) > 0 {
