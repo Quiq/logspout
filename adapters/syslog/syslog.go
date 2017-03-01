@@ -147,8 +147,8 @@ func (a *SyslogAdapter) retryTemporary(buf []byte) error {
 }
 
 func (a *SyslogAdapter) reconnect() error {
-	log.Println("syslog: reconnecting every 2s")
 	a.conn.Close()
+	log.Println("syslog: reconnecting every 2s")
 	i := 0
 	for {
 		conn, err := a.transport.Dial(a.route.Address, a.route.Options)
