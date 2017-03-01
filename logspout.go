@@ -33,19 +33,17 @@ func main() {
 		fmt.Printf("debug:%s ", getopt("DEBUG", ""))
 	}
 	fmt.Printf("persist:%s\n", getopt("ROUTESPATH", "/mnt/routes"))
+	fmt.Print("# jobs    : ")
 
-	var jobs []string
 	for _, job := range router.Jobs.All() {
+		fmt.Printf("%s ", job.Name())
 		err := job.Setup()
 		if err != nil {
-			fmt.Println("!!", err)
+			fmt.Printf("\n!!%s\n", err)
 			os.Exit(1)
 		}
-		if job.Name() != "" {
-			jobs = append(jobs, job.Name())
-		}
 	}
-	fmt.Printf("# jobs    : %s\n", strings.Join(jobs, " "))
+	fmt.Println()
 
 	routes, _ := router.Routes.GetAll()
 	if len(routes) > 0 {
