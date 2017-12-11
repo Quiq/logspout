@@ -87,24 +87,26 @@ type SyslogAdapter struct {
 }
 
 func (a *SyslogAdapter) Stream(logstream chan *router.Message) {
+	// When this function returns, logspout exits.
 	for message := range logstream {
 		m := &SyslogMessage{message}
 		buf, err := m.Render(a.tmpl)
+		// debugf("msg from chan: %s\n", m.Data)
 		if err != nil {
-			log.Println("syslog:", err)
+			log.Println("syslog (render):", err)
 			return
 		}
+		// It seems SetWriteDeadline() does not have any effect anymore.
+		// When we pause rsyslog, it takes 55s to be detected.
 		a.conn.SetWriteDeadline(time.Now().Add(10 * time.Second))
-		_, err = a.conn.Write(buf)
-		if err != nil {
+		if _, err := a.conn.Write(buf); err != nil {
 			log.Println("syslog:", err)
 			switch a.conn.(type) {
 			case *net.UDPConn:
 				continue
 			default:
-				err = a.retry(buf, err)
-				if err != nil {
-					log.Println("syslog:", err)
+				if err := a.retry(buf, err); err != nil {
+					log.Println("syslog (retry):", err)
 					return
 				}
 			}
@@ -116,71 +118,62 @@ func (a *SyslogAdapter) Stream(logstream chan *router.Message) {
 func (a *SyslogAdapter) retry(buf []byte, err error) error {
 	if opError, ok := err.(*net.OpError); ok {
 		if opError.Temporary() || opError.Timeout() {
-			retryErr := a.retryTemporary(buf)
-			if retryErr == nil {
+			if err := a.resend(buf); err == nil {
 				return nil
 			}
 		}
 	}
 
-	return a.reconnect()
+	// reconnect forever
+	a.reconnect()
+
+	return a.resend(buf)
 }
 
-func (a *SyslogAdapter) retryTemporary(buf []byte) error {
-	log.Println("syslog: retrying tcp up to 11 times")
-	err := retryExp(func() error {
-		_, err := a.conn.Write(buf)
+func (a *SyslogAdapter) resend(buf []byte) error {
+	// 10 retries with exponential intervals 20ms .. 10.24s
+	var err error
+	try, tries := 0, 10
+	for {
+		debugf("retry #%d: %s\n", try+1, buf)
+		_, err = a.conn.Write(buf)
 		if err == nil {
 			// retry successful
 			return nil
 		}
 
-		return err
-	}, 11)
+		try++
+		if try > tries {
+			// retry failed
+			return err
+		}
 
-	if err != nil {
-		// retry failed
-		return err
+		time.Sleep((1 << uint(try)) * 10 * time.Millisecond)
 	}
-
-	return nil
 }
 
-func (a *SyslogAdapter) reconnect() error {
+func (a *SyslogAdapter) reconnect() {
+	// reconnecting every second until success
 	a.conn.Close()
-	// reconnecting every 2s
 	i := 0
 	for {
 		conn, err := a.transport.Dial(a.route.Address, a.route.Options)
 		if err == nil {
 			// connection restored
 			a.conn = conn
-			return nil
+			log.Println("syslog: connection restored")
+			return
 		}
 
 		i++
-		if i == 30 {
-			log.Println("syslog: could not reconnect within the past 60s, continue...")
-			i = 0
-		}
-		time.Sleep(2 * time.Second)
+		log.Printf("syslog: reconnect attempt #%d\n", i+1)
+		time.Sleep(1 * time.Second)
 	}
 }
 
-func retryExp(fun func() error, tries uint) error {
-	try := uint(0)
-	for {
-		err := fun()
-		if err == nil {
-			return nil
-		}
-
-		try++
-		if try > tries {
-			return err
-		}
-
-		time.Sleep((1 << try) * 10 * time.Millisecond)
+func debugf(format string, v ...interface{}) {
+	if os.Getenv("DEBUG") != "" {
+		log.Printf("DEBUG "+format, v...)
 	}
 }
 
