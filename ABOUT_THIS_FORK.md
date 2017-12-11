@@ -1,8 +1,7 @@
 ## Changes on this fork
 
 * Disable backlog on container start/restart.
-* Reconnect when syslog connection is failed every second.
-* Set syslog connection deadline 10s to detect syslog in -sigstop state.
+* Reconnect every second when syslog connection fails.
 * Set syslog connection write deadline 10s to detect syslog in -sigstop state.
 * Set syslog tcp/tls connection timeout to 10s.
 * Do not lose messages during reconnect.
