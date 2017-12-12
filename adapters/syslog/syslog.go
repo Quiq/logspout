@@ -257,10 +257,10 @@ func (a *Adapter) Stream(logstream chan *router.Message) {
 		// When we pause rsyslog, it takes 55s to be detected.
 		a.conn.SetWriteDeadline(time.Now().Add(10 * time.Second))
 		if _, err = a.conn.Write(buf); err != nil {
-			log.Println("syslog:", err)
+			fmt.Println("syslog:", err)
 			if a.connIsTCP {
 				if err = a.retry(buf, err); err != nil {
-					log.Panicf("syslog retry err: %+v", err)
+					log.Println("syslog retry err: %+v", err)
 					return
 				}
 			}
@@ -315,7 +315,7 @@ func (a *Adapter) reconnect() error {
 		if err == nil {
 			// connection restored
 			a.conn = conn
-			log.Println("syslog: connection restored")
+			fmt.Println("syslog: connection restored")
 			return
 		}
 
