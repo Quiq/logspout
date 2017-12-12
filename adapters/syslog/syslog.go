@@ -100,7 +100,7 @@ func (a *SyslogAdapter) Stream(logstream chan *router.Message) {
 		// When we pause rsyslog, it takes 55s to be detected.
 		a.conn.SetWriteDeadline(time.Now().Add(10 * time.Second))
 		if _, err := a.conn.Write(buf); err != nil {
-			log.Println("syslog:", err)
+			fmt.Println("syslog:", err)
 			switch a.conn.(type) {
 			case *net.UDPConn:
 				continue
@@ -161,12 +161,12 @@ func (a *SyslogAdapter) reconnect() {
 		if err == nil {
 			// connection restored
 			a.conn = conn
-			log.Println("syslog: connection restored")
+			fmt.Println("syslog: connection restored")
 			return
 		}
 
 		i++
-		log.Printf("syslog: reconnect attempt #%d\n", i+1)
+		fmt.Printf("syslog: reconnect attempt #%d\n", i+1)
 		time.Sleep(1 * time.Second)
 	}
 }
