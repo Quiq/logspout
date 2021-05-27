@@ -265,6 +265,7 @@ func (a *Adapter) Stream(logstream chan *router.Message) {
 				}
 			}
 		}
+		a.conn.SetWriteDeadline(time.Time{})
 	}
 }
 
@@ -308,7 +309,7 @@ func (a *Adapter) resend(buf []byte) error {
 func (a *Adapter) reconnect() error {
 	log.Println("syslog: reconnecting every 2s")
 
-    a.conn.Close()
+	a.conn.Close()
 	i := 0
 	for {
 		conn, err := a.transport.Dial(a.route.Address, a.route.Options)
@@ -316,15 +317,12 @@ func (a *Adapter) reconnect() error {
 			// connection restored
 			a.conn = conn
 			fmt.Println("syslog: connection restored")
-			return
+			return nil
 		}
 
 		i++
-		if i == 150 {
-			log.Println("syslog: no luck to reconnect for the past 5m")
-			i = 0
-		}
-		time.Sleep(2 * time.Second)
+		fmt.Printf("syslog: reconnect attempt #%d\n", i+1)
+		time.Sleep(1 * time.Second)
 	}
 }
 
