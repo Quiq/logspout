@@ -46,13 +46,14 @@ func main() {
 		log.Println("# routes  :")
 		w := new(tabwriter.Writer)
 		w.Init(os.Stdout, 0, 8, 0, '\t', 0)
-		fmt.Fprintln(w, "#   ADAPTER\tADDRESS\tCONTAINERS\tSOURCES\tOPTIONS") //nolint:errcheck
+		fmt.Fprintln(w, "#   ADAPTER\tADDRESS\tCONTAINERS\tSOURCES\tREGEXP\tOPTIONS") //nolint:errcheck
 		for _, route := range routes {
 			fmt.Fprintf(w, "#   %s\t%s\t%s\t%s\t%s\n",
 				route.Adapter,
 				route.Address,
 				route.FilterID+route.FilterName+strings.Join(route.FilterLabels, ","),
 				strings.Join(route.FilterSources, ","),
+				route.FilterRegexp,
 				route.Options)
 		}
 		w.Flush()

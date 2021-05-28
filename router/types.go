@@ -5,6 +5,7 @@ import (
 	"net"
 	"net/http"
 	"path"
+	"regexp"
 	"strings"
 	"time"
 
@@ -63,6 +64,7 @@ type Route struct {
 	FilterName    string            `json:"filter_name,omitempty"`
 	FilterSources []string          `json:"filter_sources,omitempty"`
 	FilterLabels  []string          `json:"filter_labels,omitempty"`
+	FilterRegexp  string			`json:"filter_regexp,omitempty"`
 	Adapter       string            `json:"adapter"`
 	Address       string            `json:"address"`
 	Options       map[string]string `json:"options,omitempty"`
@@ -105,7 +107,7 @@ func (r *Route) Close() {
 }
 
 func (r *Route) matchAll() bool {
-	if r.FilterID == "" && r.FilterName == "" && len(r.FilterSources) == 0 && len(r.FilterLabels) == 0 {
+	if r.FilterID == "" && r.FilterName == "" && len(r.FilterSources) == 0 && len(r.FilterLabels) == 0 && r.FilterRegexp == "" {
 		return true
 	}
 	return false
@@ -151,6 +153,14 @@ func (r *Route) MatchMessage(message *Message) bool {
 	if len(r.FilterSources) > 0 && !contains(r.FilterSources, message.Source) {
 		return false
 	}
+
+	if r.FilterRegexp != "" {
+		matched, _ := regexp.MatchString(r.FilterRegexp, message.Data)
+		if !matched {
+			return false
+		}
+	}
+
 	return true
 }
 

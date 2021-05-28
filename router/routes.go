@@ -113,6 +113,9 @@ func (rm *RouteManager) AddFromURI(uri string) error {
 				r.FilterLabels = strings.Split(value, ",")
 			case "filter.sources":
 				r.FilterSources = strings.Split(value, ",")
+			case "filter.regexp":
+				unescaped, _ := url.PathUnescape(value)
+				r.FilterRegexp = unescaped
 			default:
 				r.Options[key] = value
 			}
