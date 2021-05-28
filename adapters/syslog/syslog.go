@@ -307,7 +307,7 @@ func (a *Adapter) resend(buf []byte) error {
 }
 
 func (a *Adapter) reconnect() error {
-	log.Println("syslog: reconnecting every 2s")
+	fmt.Println("syslog: reconnecting every second")
 
 	a.conn.Close()
 	i := 0
