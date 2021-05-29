@@ -64,7 +64,7 @@ type Route struct {
 	FilterName    string            `json:"filter_name,omitempty"`
 	FilterSources []string          `json:"filter_sources,omitempty"`
 	FilterLabels  []string          `json:"filter_labels,omitempty"`
-	FilterRegexp  string			`json:"filter_regexp,omitempty"`
+	FilterRegexp  string            `json:"filter_regexp,omitempty"`
 	Adapter       string            `json:"adapter"`
 	Address       string            `json:"address"`
 	Options       map[string]string `json:"options,omitempty"`
@@ -156,7 +156,7 @@ func (r *Route) MatchMessage(message *Message) bool {
 
 	if r.FilterRegexp != "" {
 		matched, _ := regexp.MatchString(r.FilterRegexp, message.Data)
-		if !matched {
+		if matched {
 			return false
 		}
 	}

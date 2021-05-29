@@ -102,12 +102,12 @@ You can route to multiple destinations by comma-separating the URIs:
 
 #### Filtering log messages based on a regular expression
 
-You can filter log messages using a regular expression as follows: 
+You can filter out log messages using a regular expression as follows: 
 
   $ docker run \
 		--volume=/var/run/docker.sock:/var/run/docker.sock \
 		gliderlabs/logspout \
-		syslog+tls://logs.papertrailapp.com:55555?filter.regexp=%5E%5B%5EWARN%7CERR%5D
+		syslog+tls://logs.papertrailapp.com:55555?filter.regexp=%22level%22%5C%3A%22%28INFO%7CDEBUG%29%22
 
 #### Suppressing backlog tail
 You can tell logspout to only display log entries since container "start" or "restart" event by setting a `BACKLOG=false` environment variable (equivalent to `docker logs --since=0s`):

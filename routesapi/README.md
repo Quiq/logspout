@@ -22,7 +22,7 @@ Takes a JSON object like this:
 	}
 
 The main fields are `adapter` and `address`. The field `options` is passed to the adapter. There are five filter fields: `filter_name`, `filter_sources`, `filter_id`, `filter_labels` and `filter_regexp`. These let you limit which containers or types of logs to route. Use `filter_id` to limit to a particular container by ID. Use `filter_name` to match against container names. These can include wildcards. Use `filter_sources` to limit to `stdout` or `stderr`, or soon `syslog`. Use `filter_labels` to limit containers to require specific labels. These can include wildcards. Use `filter_regexp` to filter to 
-only messages that match a provided regular expression.
+exclude messages that match a provided regular expression.
 
 To route all logs of all types on all containers, don't specify any filter values.
 
